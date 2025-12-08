@@ -60,5 +60,18 @@ question = "文中举了哪些例子？"
 retrieved_docs = vectorstore.similarity_search(question, k=3)
 docs_content = "\n\n".join(doc.page_content for doc in retrieved_docs)
 
-answer = llm.invoke(prompt.format(question=question, context=docs_content))
-print(answer)
+try:
+    answer = llm.invoke(prompt.format(question=question, context=docs_content))
+    print(answer)
+except Exception as e:
+    err_str = str(e)
+    # 针对常见的余额/计费错误给出可操作提示
+    if "Insufficient Balance" in err_str or "402" in err_str or "insufficient" in err_str.lower():
+        print("调用 API 失败：检测到余额/计费问题（Insufficient Balance / 402）。")
+        print("解决建议：")
+        print("- 检查并充值你的 OpenAI / DeepSeek 账户余额。")
+        print("- 检查环境变量是否正确设置：例如 `DEEPSEEK_API_KEY` 或 `OPENAI_API_KEY`。")
+        print("- 如不想/不能使用外部付费 API，可改用本地 HuggingFace 模型作为回退。")
+        print("（原始错误信息：{}）".format(err_str))
+    else:
+        print("调用 LLM 时发生错误：", err_str)
