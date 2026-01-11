@@ -63,7 +63,7 @@ class RecipeRAGSystem:
             self.config.index_save_path)
         print("🤖 初始化生成集成模块...")
         self.generation_module = GenerationIntegrationModule(
-            model_name = self.config.embedding_model_name,
+            model_name = self.config.llm_model_name,
             temperature = self.config.temperature,
             max_tokens = self.config.max_tokens
         )
@@ -146,7 +146,7 @@ class RecipeRAGSystem:
         ## 显示检索到的子块信息
         print(f"找到 {len(relevant_chunks)} 个相关文档块")
         if relevant_chunks:
-            chunk_ingo = []
+            chunk_info = []
             for chunk in relevant_chunks:
                 dish_name = chunk.metadata.get('dish_name', '未知菜品')
                 # 尝试从内容中提取章节标题
@@ -306,24 +306,24 @@ class RecipeRAGSystem:
         self.build_knowledge_base()
         print("\n交互式问答 (输入'退出'结束):")
 
+        # 询问是否使用流式输出                
+        stream_choice = input("是否使用流式输出? (y/n, 默认y): ").strip().lower()
         while True:
             try:
                 user_input = input("\n您的问题：   ").strip()
                 if user_input.lower() in ['退出', 'exit', 'quit', '']:
                     break
-                # 询问是否使用流式输出                
-                stream_choice = input("是否使用流式输出? (y/n, 默认y): ").strip().lower()
                 use_stream = stream_choice != 'n'
 
                 print("\n回答：")
                 if use_stream:
                     # 流式输出
-                    for chunk in self.ask_question(user_input, stream=True):
+                    for chunk in self.answer_query(user_input, stream=True):
                         print(chunk, end='',flush=True)
                     print('\n')
                 else:
                     # 普通输出
-                    answer = self.ask_question(user_input,stream=True)
+                    answer = self.answer_query(user_input,stream=False)
                     print(answer)
 
             except KeyboardInterrupt:

@@ -11,3 +11,4 @@ torch==2.2.2
 lazy_loader==0.4
 rank_bm25==0.2.2
 openai>=1.86.0,<2.0.0
+numpy==1.26.4 # faiss不支持2.0以上的版本，必须使用numpy 1.x版本

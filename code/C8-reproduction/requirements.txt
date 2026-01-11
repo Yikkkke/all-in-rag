@@ -161,7 +161,7 @@ networkx==3.6.1
     # via torch
 nltk==3.9.2
     # via unstructured
-numpy==2.4.0
+numpy==1.26.4
     # via
     #   faiss-cpu
     #   langchain-community

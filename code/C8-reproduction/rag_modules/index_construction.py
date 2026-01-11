@@ -52,7 +52,6 @@ class IndexConstructionModule:
             raise ValueError("文档块列表不能为空")
         
         # 构建FAISS向量存储
-        print(type(chunks[0]),type(self.embeddings))
         try:
             self.vectorstore = FAISS.from_documents(
                 documents = chunks,
@@ -116,7 +115,10 @@ class IndexConstructionModule:
         
         try:
             logger.info(f"正在从路径加载向量索引: {self.index_save_path}")
-            self.vectorstore = FAISS.load_local(self.index_save_path, self.embeddings)
+            self.vectorstore = FAISS.load_local(
+                self.index_save_path, 
+                self.embeddings,
+                allow_dangerous_deserialization=True)# 只能在受本人生成的向量索引文件里使用
             logger.info("向量索引加载完成")
             return self.vectorstore
         except Exception as e:
