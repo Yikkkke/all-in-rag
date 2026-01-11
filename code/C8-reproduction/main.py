@@ -12,7 +12,7 @@ from typing import List
 sys.path.append(str(Path(__file__).resolve().parent))
 
 from dotenv import load_dotenv
-from config import DEFAULT_CONFIG 
+from config import DEFAULT_CONFIG, RAGconfig
 from rag_modules import (
     DataPreparationModule,
     IndexConstructionModule,
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class RecipeRAGSystem:
     """RAG系统主程序"""
     
-    def __init__(self, config: RAGConfig = DEFAULT_CONFIG):
+    def __init__(self, config: RAGconfig = DEFAULT_CONFIG):
         """
         初始化RAG系统
 
@@ -59,11 +59,11 @@ class RecipeRAGSystem:
         self.data_module = DataPreparationModule(self.config.data_path)
         print("初始化索引构建模块...")
         self.index_module = IndexConstructionModule(
-            self.config.model_name,
+            self.config.embedding_model_name,
             self.config.index_save_path)
         print("🤖 初始化生成集成模块...")
-        self.retrieval_module = RetrievalOptimizationModule(
-            model_name = self.config.model_name,
+        self.generation_module = GenerationIntegrationModule(
+            model_name = self.config.embedding_model_name,
             temperature = self.config.temperature,
             max_tokens = self.config.max_tokens
         )

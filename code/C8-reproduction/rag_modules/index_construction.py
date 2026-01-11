@@ -52,10 +52,15 @@ class IndexConstructionModule:
             raise ValueError("文档块列表不能为空")
         
         # 构建FAISS向量存储
-        self.vectorstore = FAISS.from_documents(
-            documents = chunks,
-            embedding = self.embeddings
-        )
+        print(type(chunks[0]),type(self.embeddings))
+        try:
+            self.vectorstore = FAISS.from_documents(
+                documents = chunks,
+                embedding = self.embeddings
+            )
+        except Exception as e:
+            logger.error(f"构建向量索引时出错: {e}")
+            raise e
 
         logger.info("FAISS向量索引构建完成， 包含 {len(chunks)} 个向量")
         return self.vectorstore

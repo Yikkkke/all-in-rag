@@ -16,7 +16,7 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 )
 
-class DataPreparation:
+class DataPreparationModule:
     """数据准备模块 - 负责数据加载、清洗和预处理"""
     # 统一维护的分类与难度配置，供外部复用，避免关键词重复定义
     CATEGORY_MAPPING = {
