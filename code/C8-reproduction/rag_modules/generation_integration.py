@@ -335,9 +335,45 @@ class GenerationIntegrationModule:
         Yields:
             详细步骤回答片段
         """
-        pass
+        context = self._build_context(context_docs)
+        prompt = ChatPromptTemplate.from_template("""
+你是一位专业的烹饪导师。请根据食谱信息，为用户提供详细的分步骤指导。
 
+用户问题: {question}
 
+相关食谱信息:
+{context}
+
+请灵活组织回答，建议包含以下部分（可根据实际内容调整）：
+
+## 🥘 菜品介绍
+[简要介绍菜品特点和难度]
+
+## 🛒 所需食材
+[列出主要食材和用量]
+
+## 👨‍🍳 制作步骤
+[详细的分步骤说明，每步包含具体操作和大概所需时间]
+
+## 💡 制作技巧
+[仅在有实用技巧时包含。如果原文的"附加内容"与烹饪无关或为空，可以基于制作步骤总结关键要点，或者完全省略此部分]
+
+注意：
+- 根据实际内容灵活调整结构
+- 不要强行填充无关内容
+- 重点突出实用性和可操作性
+
+回答:"""
+        )
+        chain = (
+            {'question':RunnablePassthrough(), 'context':lambda _:context}
+            | prompt
+            | self.llm
+            | StrOutputParser
+        )
+        for chunk in chain.stream(query):
+            yield chunk
+            
 
 
 

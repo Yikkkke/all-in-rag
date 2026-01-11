@@ -67,6 +67,47 @@ class RetrievalOptimizationModule:
         return combined_results[:top_k]
     
 
+    def metadata_filtered_search(self, query: str, metadata_filters: Dict[str, Any], top_k: int = 5) -> List[Document]:
+        """
+        基于元数据过滤的检索
+
+        Args:
+            query: 查询文本
+            metadata_filters: 元数据过滤条件字典
+            top_k: 返回结果数量
+
+        Returns:
+            检索到的文档列表
+        """
+        # 先进行混合检索
+        initial_docs = self.hybrid_search(query, top_k=top_k*3)  # 多取一些以便过滤后仍有足够结果
+
+        # 应用元数据过滤
+        filtered_docs = []
+        for doc in initial_docs:
+            match = True
+            for key, value in metadata_filters.items():
+                if key in doc.metadata:
+                    # 对于metadata_filters的字典values，支持列表和单值匹配
+                    if isinstance(value, list):
+                        if doc.metadata[key] not in value:
+                            match = False
+                            break
+                    else:
+                        if doc.metadata[key] != value:
+                            match = False
+                            break
+                else:
+                    match = False
+                    break
+            if match:
+                filtered_docs.append(doc)
+                if len(filtered_docs) >= top_k:
+                    break
+        logger.info(f"应用元数据过滤后，返回 {len(filtered_docs)} 个文档")
+        return filtered_docs
+
+
     def _rrf_rerank(self, vector_docs: List[Document], bm25_docs: List[Document], k: int) -> List[Document]:   
         """
         使用RRF (Reciprocal Rank Fusion) 算法重排文档
@@ -117,43 +158,3 @@ class RetrievalOptimizationModule:
         logger.info(f"RRF重排完成: 向量检索{len(vector_docs)}个文档, BM25检索{len(bm25_docs)}个文档, 合并后{len(final_docs)}个文档")
         return final_docs
 
-
-    def metadata_filtered_search(self, query: str, metadata_filters: Dict[str, Any], top_k: int = 5) -> List[Document]:
-        """
-        基于元数据过滤的检索
-
-        Args:
-            query: 查询文本
-            metadata_filters: 元数据过滤条件字典
-            top_k: 返回结果数量
-
-        Returns:
-            检索到的文档列表
-        """
-        # 先进行混合检索
-        initial_docs = self.hybrid_search(query, top_k=top_k*3)  # 多取一些以便过滤后仍有足够结果
-
-        # 应用元数据过滤
-        filtered_docs = []
-        for doc in initial_docs:
-            match = True
-            for key, value in metadata_filters.items():
-                if key in doc.metadata:
-                    # 对于metadata_filters的字典values，支持列表和单值匹配
-                    if isinstance(value, list):
-                        if doc.metadata[key] not in value:
-                            match = False
-                            break
-                    else:
-                        if doc.metadata[key] != value:
-                            match = False
-                            break
-                else:
-                    match = False
-                    break
-            if match:
-                filtered_docs.append(doc)
-                if len(filtered_docs) >= top_k:
-                    break
-        logger.info(f"应用元数据过滤后，返回 {len(filtered_docs)} 个文档")
-        return filtered_docs

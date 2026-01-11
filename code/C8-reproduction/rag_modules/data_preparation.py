@@ -45,7 +45,7 @@ class DataPreparation:
         self.parent_child_map: Dict[str, str] = {} # 子文档ID到父文档ID的映射
 
 
-    def load_data(self) -> List[Document]:
+    def load_documents(self) -> List[Document]:
         """
         加载数据文件夹中的所有文档
         Args:
@@ -318,7 +318,7 @@ class DataPreparation:
         logger.info(f"元数据已导出到: {output_path}")
 
 
-    def get_parent_document(self, child_chunks: List[Document]) -> List[Document]:
+    def get_parent_documents(self, child_chunks: List[Document]) -> List[Document]:
         """
         根据子文档列表获取对应的父文档列表（智能去重）
         
@@ -370,7 +370,7 @@ if __name__ == "__main__":
     config = DEFAULT_CONFIG
     data_path = config.data_path
     test = DataPreparation(data_path)
-    test.load_data()
+    test.load_documents()
 
     test.chunk_documents()
     test.get_parent_document(test.chunks)
