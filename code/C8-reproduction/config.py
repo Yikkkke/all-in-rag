@@ -19,6 +19,12 @@ class RAGconfig:
     temperature: float = 0.1
     max_tokens:int = 2048
 
+    # 日志配置
+    enable_file_log: bool = True
+    enable_console_log: bool = False
+    log_file: str = "logs/recipe_rag.log"
+    log_level: str = "INFO"
+
 
     def __post_init__(self):
         """初始化后的处理"""
@@ -38,7 +44,11 @@ class RAGconfig:
             'llm_model_name': self.llm_model_name,
             'top_k': self.top_k,
             'temperature': self.temperature,
-            'max_tokens': self.max_tokens
+            'max_tokens': self.max_tokens,
+            'enable_file_log': self.enable_file_log,
+            'enable_console_log': self.enable_console_log,
+            'log_file': self.log_file,
+            'log_level': self.log_level
         }
 
 # 默认配置实例

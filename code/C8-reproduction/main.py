@@ -22,10 +22,46 @@ from rag_modules import (
 
 load_dotenv()
 
+# 配置日志记录（可通过 `DEFAULT_CONFIG` 控制是否输出到文件/终端）
+log_level = getattr(logging, DEFAULT_CONFIG.log_level.upper(), logging.INFO)
 logging.basicConfig(
-    level=logging.INFO,
+    level=log_level,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
+root_logger = logging.getLogger()
+
+# 处理终端输出（StreamHandler）
+if not DEFAULT_CONFIG.enable_console_log:
+    for h in list(root_logger.handlers):
+        if isinstance(h, logging.StreamHandler):
+            root_logger.removeHandler(h)
+else:
+    # 确保至少有一个 StreamHandler
+    if not any(isinstance(h, logging.StreamHandler) for h in root_logger.handlers):
+        sh = logging.StreamHandler()
+        sh.setLevel(log_level)
+        sh.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+        root_logger.addHandler(sh)
+
+# 处理文件输出（FileHandler）
+log_file_path = Path(DEFAULT_CONFIG.log_file)
+if DEFAULT_CONFIG.enable_file_log:
+    log_file_path.parent.mkdir(parents=True, exist_ok=True)
+    found = False
+    for h in root_logger.handlers:
+        if getattr(h, "baseFilename", None) == str(log_file_path):
+            found = True
+            break
+    if not found:
+        fh = logging.FileHandler(filename=str(log_file_path), encoding="utf-8")
+        fh.setLevel(log_level)
+        fh.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+        root_logger.addHandler(fh)
+else:
+    for h in list(root_logger.handlers):
+        if isinstance(h, logging.FileHandler) and getattr(h, "baseFilename", None) == str(log_file_path):
+            root_logger.removeHandler(h)
+
 logger = logging.getLogger(__name__)
 
 class RecipeRAGSystem:
